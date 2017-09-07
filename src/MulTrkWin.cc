@@ -1,17 +1,16 @@
 #include "stdafx.h"
 #include "MultiTrack.h"
 #include "FileList.h"
-#include "WinOO\Extra\ListBox_LineNum.h"
 #include "FirstGui.h"
 #include "resource.h"
 
 class _RomSizePrn
 {
 public:
-	CStatic romSize;
+	HWND romSize;
 	int used;
 	void Init(HWND hwnd){
-		romSize = Static(STC_ROMSIZE);
+		romSize = GetDlgItem(hwnd, STC_ROMSIZE);
 		used = 0;
 	}
 	void Set(int _used){
@@ -21,7 +20,7 @@ public:
 		setWindowText(romSize, usedtemp);
 	}
 	INT_PTR ColorStatic( WPARAM wParam, LPARAM lParam ){
-		if((used > 1024*4096)&&(lParam == (LPARAM)romSize._hwnd)){
+		if((used > 1024*4096)&&(lParam == (LPARAM)romSize)){
 			HDC hDC = (HDC)wParam;
 			SetTextColor(hDC, RGB(255, 0, 0));
 			SetBkMode(hDC, TRANSPARENT);
@@ -34,20 +33,20 @@ public:
 class _StaticPrn
 {
 public:
-	CStatic static1;
-	CStatic static2;
+	HWND static1;
+	HWND static2;
 	bool col1; bool line;
 	void Init(HWND hwnd){
-		static1 = Static(STC_RBLINE1);
-		static2 = Static(STC_RBLINE2);
+		static1 = GetDlgItem(hwnd, STC_RBLINE1);
+		static2 = GetDlgItem(hwnd, STC_RBLINE2);
 		col1 = 0; line = 0;}
 	void Clear(bool mode){
 		bool _line = line & mode;
 		if(_line == 0){
 			col1 = 0;
-			static1.SetWindowTextA("");
+			SetWindowTextA(static1, "");
 		}else
-			static2.SetWindowTextA("");
+			SetWindowTextA(static2, "");
 	}
 	void Write(bool mode, bool col, char symb, const char* text)
 	{
@@ -67,7 +66,7 @@ public:
 		line = 1;
 	}
 	INT_PTR ColorStatic( WPARAM wParam, LPARAM lParam ){
-		if((col1)&&(lParam == (LPARAM)static1._hwnd)){
+		if((col1)&&(lParam == (LPARAM)static1)){
 			HDC hDC = (HDC)wParam;
 			SetTextColor(hDC, RGB(255, 0, 0));
 			SetBkMode(hDC, TRANSPARENT);
@@ -77,101 +76,104 @@ public:
 	}
 };
 
-#define MSGIF_CTLCOLORSTATIC( func )  		\
-	if( message == WM_CTLCOLORSTATIC){ 			\
-		INT_PTR tmp = func(wParam, lParam);		\
-		if( tmp != 0 ){							\
-			lresult = tmp;						\
-			MSGTRUE();}}
-
-CDialog(MultiTrackWinGui)
-
+struct MultiTrackWinGui
+{
+	HWND hwnd;
 	MultiTrack mt;
 	RECT& rc;
 	MultiTrackWinGui(RECT& rcIn) : rc(rcIn){}
 	
 	// GUI variables
+	WndResize wndResize;
 	_RomSizePrn RomSizePrn;
 	_StaticPrn StaticPrn;
-	ListBox_LineNum ListBox;
 
 	// message handlers
-	MsgReflecta();
-	Resize_Macro(1, true);
-	CInitDialogHandlr();
-	CMainWndProcHandlr();
 	void AddFile(FileNameList& fnl);
+	void OnInit(HWND hwnd);
+	MEMBER_DLGPROC(MultiTrackWinGui, 
+		DlgProc, This->OnInit(hwnd))
+};
 
-_CDialog(MultiTrackWinGui)
+/* helper functions */
+void WINAPI listBox_delStr(HWND h, DWORD c, int i) {
+	sendDlgMsg(h, c, LB_DELETESTRING, i); }
+#define ILREV(i,n,x,f) for(int i = n; --i >= 0; x) {f;}
+#define ON_MINMAXINFO(f) ON_MESSAGE(WM_GETMINMAXINFO, \
+	MINMAXINFO& mi = *(MINMAXINFO*)lParam; f)
+SIZE wndFrmSize(HWND hwnd) { RECT wr, cr;
+	GetWindowRect(hwnd, &wr); GetClientRect(hwnd, &cr);
+	return {RECT_W(wr)-cr.right, RECT_H(wr)-cr.bottom}; }
+void wndSetMin(HWND hwnd, MINMAXINFO& mi, int mx, int my) {
+	SIZE fsz = wndFrmSize(hwnd);
+	if(mx > 0) mi.ptMinTrackSize.x = mx + fsz.cx;
+	if(my > 0) mi.ptMinTrackSize.y = my + fsz.cy; }
 
-FInitDialogHandlr(MultiTrackWinGui)
+INT_PTR CALLBACK MultiTrackWinGui::DlgProc(HWND hwnd,
+	UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	DLGMSG_SWITCH( 
+	 REFLECT_DRAWITEM
+	 ON_MESSAGE(WM_SIZE, wndResize.	resize(hwnd, wParam, lParam))
+	 ON_MINMAXINFO(wndSetMin(hwnd, mi, wndResize.orgSize.X, 0))
+	 ON_MESSAGE(WM_CTLCOLORSTATIC,
+	   RomSizePrn.ColorStatic(wParam, lParam);
+	   RomSizePrn.ColorStatic(wParam, lParam))
+	 ON_MESSAGE(WM_DROPFILES, 
+		StaticPrn.Clear(true); FileNameList fnl;
+		fnl.FropHdrop((HDROP)wParam); this->AddFile(fnl))
+	 CASE_COMMAND(
+	  ON_COMMAND(IDCANCEL, EndDialog(hwnd, 1))
+	  ON_COMMAND(BTN_ADDTRK,
+		StaticPrn.Clear(true); FileNameList fnl;
+		fnl.FromOfn(hwnd); this->AddFile(fnl);)
+	  ON_COMMAND(BTN_REMTRK, ILREV(i, mt.nTracks,,
+		if(listBox_getSel(hwnd, LST_RBLIST, i) > 0) {
+			listBox_delStr(hwnd, LST_RBLIST, i); mt.
+			remove(i); }) RomSizePrn.Set(mt.totalSize))
+	  ON_COMMAND(BTN_BUILDROM, if(mt.nTracks != 0)
+		EndDialog(hwnd, mt.build() + 1); else StaticPrn
+			.Write(0, 0, 0, "No Tracks Selected!"))
+	  ON_COMMAND(BTN_RBOPTIONS, showOptions(hwnd))
+	  ON_CONTROL(LBN_SELCHANGE, LST_RBLIST,
+		for(int i = 0; i < mt.nTracks; i++) mt.select
+			(i, listBox_getSel(hwnd, LST_RBLIST, i) > 0);
+		RomSizePrn.Set(mt.totalSize))
+	 ,)
+	,)	
+
+
+
+
+}
+
+void MultiTrackWinGui::OnInit(HWND hwnd)
+{
+	this->hwnd = hwnd;
+
 	RomSizePrn.Init(hwnd);
-	StaticPrn.Init(hwnd);
-	ListBox.SubClass(Listbox(LST_RBLIST));
-	SetMinSize(-1, -2);
-	ResizeAdd(LST_RBLIST, HOR_BOTH, VER_BOTH);
+	StaticPrn.Init(hwnd);	
+	
+	wndResize.init(hwnd);
+	wndResize.add(hwnd, LST_RBLIST, HVR_BOTH);
+	
+	LinNumListBoxInit(GetDlgItem(hwnd, LST_RBLIST));
+	
+	
+	
+	
 	MtiRectCalc(hwnd, rc);
 }
 
-FMainWndProcHandlrM(MultiTrackWinGui)
-{
-	MSGIF_CTLCOLORSTATIC( RomSizePrn.ColorStatic );
-	MSGIF_CTLCOLORSTATIC( StaticPrn.ColorStatic );
 
-	MSGIF( SINGLE_MSG_TST( WM_DROPFILES ) )
-	{
-		StaticPrn.Clear(true);
-		FileNameList fnl;
-		fnl.FropHdrop((HDROP)wParam);
-		this->AddFile(fnl);
-	}
+//FInitDialogHandlr(MultiTrackWinGui)
+//{
 
-	MSGIF( WM_COMMAND_TST1( BTN_ADDTRK ) )
-	{
-		StaticPrn.Clear(true);
-		FileNameList fnl;
-		fnl.FromOfn(hwnd);
-		this->AddFile(fnl);
-	}
 	
-	MSGIF( WM_COMMAND_TST1( BTN_REMTRK ) )
-	{
-		int selection;
-		while(ListBox.GetSelItems(1, &selection) > 0)
-		{
-			ListBox.DeleteString(selection);
-			mt.remove(selection);
-		}
-		RomSizePrn.Set(mt.totalSize);
-	}
+	//SetMinSize(-1, -2);
+	//ResizeAdd(LST_RBLIST, HOR_BOTH, VER_BOTH);
 	
-	MSGIF(  WM_COMMAND_TST1( BTN_BUILDROM ) )
-	{
-		if(mt.nTracks != 0)
-			EndDialog( mt.build() + 1);
-		else
-			StaticPrn.Write(0, 0, 0, "No Tracks Selected!");
-	}
-	
-	MSGIF(  WM_COMMAND_TST1( BTN_RBOPTIONS ) )
-	{
-		showOptions(hwnd);
-	}
-	
-	MSGIF(  WM_COMMAND_TST1( IDCANCEL ) )
-	{
-		EndDialog(1);
-	}
-			
-	MSGIF(  WM_COMMAND_TST2( LST_RBLIST, LBN_SELCHANGE ) )
-	{
-		for(int i = 0; i < mt.nTracks; i++)
-			mt.select(i, ListBox.GetSel(i));
-		RomSizePrn.Set(mt.totalSize);
-	}
-
-}_FMainWndProcHandlrM()
+//}
 
 void MultiTrackWinGui::AddFile(FileNameList& fnl)
 {
@@ -189,7 +191,7 @@ void MultiTrackWinGui::AddFile(FileNameList& fnl)
 		}
 		else
 		{
-			sendMessageU(ListBox, LB_ADDSTRING, filename);
+			listBox_addStr(hwnd, LST_RBLIST, filename);
 			RomSizePrn.Set(mt.totalSize);
 			StaticPrn.Clear(true);
 		}
@@ -199,7 +201,9 @@ void MultiTrackWinGui::AddFile(FileNameList& fnl)
 bool MultiTrackWin(RECT& rc)
 {
 	MultiTrackWinGui mtw(rc);
-	int result = (int)mtw.Create(NULL, _T("ROMBUILD_DIALOG"), true);
+	int result = DialogBoxParam(GetModuleHandle(0), 
+		L"ROMBUILD_DIALOG", 
+		NULL, MultiTrackWinGui::cDlgProc, (LPARAM)&mtw);
 	if(result <= 0)
 		fatalError("Cannot create GUI");
 	return result-1;
