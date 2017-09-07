@@ -1,11 +1,10 @@
 #ifndef _VGM_PLAY_H_
 #define _VGM_PLAY_H_
-#include "lib/stdshit.h"
 
 // global strings
-extern TCHAR* ExePath;
-extern TCHAR* ExeName;
-TCHAR* ExePathCat(const char* name);
+extern char* ExePath;
+extern char* ExeName;
+char* ExePathCat(const char* name);
 
 // configuration
 struct Config
@@ -18,7 +17,7 @@ struct Config
 	double scaleNum;
 	double scaleDom;
 	int dupRemove;
-	static TCHAR* EmuPath;
+	char* EmuPath;
 	
 	void getScale(char* buff);
 	void setScale(const char* buff);

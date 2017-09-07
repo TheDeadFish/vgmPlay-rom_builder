@@ -1,4 +1,3 @@
-#include "CString\CString.cpp"
 #include "SimpClasses.cpp"
 #include "CWindow.cpp"
 #include "CDialog.cpp"

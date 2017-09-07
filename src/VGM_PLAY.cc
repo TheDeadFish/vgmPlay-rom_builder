@@ -1,19 +1,26 @@
+#include "stdafx.h"
 #include "VGM_PLAY.h"
 #include "FirstGui.h"
 #include "MultiTrack.h"
 #include <psapi.h>
-#include "lib/mingw-unicode.c"
+
 const char progName[] = "vgmPlay";
 
-TCHAR* ExePath;
-TCHAR* ExeName;
-TCHAR* Config::EmuPath;
+INI_DEFUCT(vgmPlayConf, Config, INI_DS8(RepeatLooped, Int)
+	INI_DS8(MS_Pause, Int) INI_DS(RomPad, Int)
+	INI_DSN(EmuPID, Int) INI_DS8(bitOpts, Int)
+	INI_DS1(dupRemove, Int) INI_DS1(scaleNum, Double)
+	INI_DS1(scaleDom, Double)INI_DS8(EmuPath, Str));
+	
+	
+
 Config config;
 
-TCHAR* ExePathCat(const char* name)
+char* ExePathCat(const char* name)
 {
-	TCHAR* dst = ExeName;
-	while(*dst++ = *name++);
+	static char* ExePath;
+	free_repl(ExePath, pathCat(
+		getProgramDir(), name));
 	return ExePath;
 }
 
@@ -38,54 +45,21 @@ void Config::setScale(const char* buff)
 
 void Config::load()
 {
-	// Get program directory
-	TCHAR buff[MAX_PATH];
-	if(GetModuleFileName(NULL, buff, MAX_PATH) == MAX_PATH)
-		errorMaxPath();
-	int pathLen = getPathLen(buff);
-	ExePath = xmalloc(pathLen+20);
-	ExeName = ExePath+pathLen;
-	strcpy(ExePath, buff);
-
-	// Load configuration
-	FILE* fp = xfopen(
-		ExePathCat("vgmPlay.cfg"), _T("rb"));
-	if( fp != NULL )
-	{
-		int size = fsize(fp) - sizeof(Config);
-		if(size >= 0)
-		{
-			size /= sizeof(TCHAR);
-			EmuPath = xmalloc(size+1);
-			EmuPath[size] = '\0';
-			xfread(*this, fp);
-			xfread(EmuPath, size, fp);
-		}
-		fclose(fp);
-	}
-	
-	// Load defaults
-	if(EmuPath == NULL)
-	{
-		RepeatLooped = 3;
-		MS_Pause = 750;
-		RomPad = 0;
-		EmuPID = -1;
-		scaleNum = 1;
-		scaleDom = 1;
-		bitOpts = EmuTerm | DacAvenc;
-		dupRemove = 1;
-		EmuPath = (TCHAR*)"";
-	}
+	{ IniFile_Load ini;
+	ini.load(ExePathCat("vgmPlay.cfg"));
+	vgmPlayConf->readBlock(&ini, "config", this); }
+	if(RepeatLooped < 0) RepeatLooped = 3;
+	if(MS_Pause < 0) MS_Pause = 750;
+	if(bitOpts < 0) bitOpts = EmuTerm | DacAvenc;
 }
 
 void Config::save()
 {
-	FILE* fp = xfopen(
-		ExePathCat("vgmPlay.cfg"), "!wb");
-	xfwrite(*this, fp);
-	xfwrite(EmuPath, strlen(EmuPath)+1, fp);
-	fclose(fp);
+	IniFile_Save ini;
+	ini.create(ExePathCat("vgmPlay.cfg"));
+	vgmPlayConf->writeBlock(&ini, "config", this);
+	if(!ini.close()) contError(NULL,
+		"failed to save config file");	
 }
 
 void callrom(void)
@@ -93,13 +67,12 @@ void callrom(void)
 	// Terminate previous
 	if((config.bitOpts & EmuTerm)&&(config.EmuPID != -1))
 	{
-		TCHAR procName[MAX_PATH] = _T("");
 		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | 
 			PROCESS_VM_READ | PROCESS_TERMINATE, FALSE, config.EmuPID);
 		if(hProcess != NULL)
 		{
-			GetModuleFileNameEx(hProcess, NULL, procName, MAX_PATH);
-			if(stricmp(procName, config.EmuPath) == 0)
+			xstr procName = getModuleFileNameEx(hProcess, 0);
+			if(procName && !stricmp(procName, config.EmuPath))
 				TerminateProcess(hProcess, 0);
 			CloseHandle(hProcess);
 		}
@@ -108,13 +81,12 @@ void callrom(void)
 	// Call emulator
 	if(config.bitOpts & EmuSpwn)
 	{
-		TCHAR cmdLine[560];
-		snprintf(cmdLine, ARRAYSIZE(cmdLine), _T("\"%s\" \"%s\""),
+		xstr cmd = xstrfmt("\"%s\" \"%s\"", 
 			config.EmuPath, ExePathCat("vgmPlay.bin"));
 		
-		STARTUPINFO si = {0};
+		STARTUPINFOA si = {0};
 		PROCESS_INFORMATION pi = {0};
-		if( !CreateProcess(NULL, cmdLine, NULL, NULL, FALSE, 
+		if( !createProcess(NULL, cmd, NULL, NULL, FALSE, 
 			DETACHED_PROCESS, NULL, NULL, &si, &pi))
 		{
 			contError(NULL, "Failed to call emulator, emulator calling will be disabled");
@@ -130,13 +102,13 @@ void callrom(void)
 	}
 }
 
-int _tmain(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	config.load();
 	bool built = false;
 	if(argc >= 2)
 	{
-		if(strEicmp(argv[1], _T(".EXE")) == 0)
+		if(strEicmp(argv[1], ".EXE") == 0)
 		{
 			config.EmuPath = xstrdup(argv[1]);
 			config.bitOpts |= EmuSpwn;

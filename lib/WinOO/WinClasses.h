@@ -11,7 +11,6 @@
 #define VERIFY(f) ASSERT(f)
 #include "SimpClasses.h"
 #include "WinMacroUndef.h"
-#include "CString\CString.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Classes declared in this file
@@ -151,8 +150,8 @@ public:
 	int GetWindowTextA( LPSTR lpString, int nMaxCount ) { return ::GetWindowTextA( _hwnd, lpString, nMaxCount ); }
 	int GetWindowTextW( LPWSTR lpString, int nMaxCount ) { return ::GetWindowTextW( _hwnd, lpString, nMaxCount ); }
 	int GetWindowText( LPTSTR lpString, int nMaxCount ) { return ::GetWindowText( _hwnd, lpString, nMaxCount ); }
-	void GetWindowText(CString& rString) const { ASSERT(::IsWindow(_hwnd)); int nLen = ::GetWindowTextLength(_hwnd);
-	::GetWindowText(_hwnd, rString.GetBufferSetLength(nLen), nLen+1); rString.ReleaseBuffer(); }
+	//void GetWindowText(CString& rString) const { ASSERT(::IsWindow(_hwnd)); int nLen = ::GetWindowTextLength(_hwnd);
+	//::GetWindowText(_hwnd, rString.GetBufferSetLength(nLen), nLen+1); rString.ReleaseBuffer(); }
 	int GetWindowTextLength() const;
 	void SetFont(CFont* pFont, BOOL bRedraw = TRUE);
 	CFont GetFont() const;
@@ -277,7 +276,7 @@ public:
 	int GetDlgItemTextA (int nID,LPSTR lpStr,int nMaxCount)const;
 	int GetDlgItemTextW (int nID,LPWSTR lpStr,int nMaxCount)const;
 	int GetDlgItemText(int nID,LPTSTR lpStr,int nMaxCount)const;
-	int GetDlgItemText(int nID, CString& rString) const;
+	//int GetDlgItemText(int nID, CString& rString) const;
 	CWnd GetNextDlgGroupItem(CWnd pWndCtl, BOOL bPrevious = FALSE) const;
 
 	CWnd GetNextDlgTabItem(CWnd pWndCtl, BOOL bPrevious = FALSE) const;
@@ -547,9 +546,9 @@ public:
 	{ ASSERT(::IsWindow(_hwnd)); return (int)::SendMessageW(_hwnd, LB_GETTEXT, nIndex, (LPARAM)lpszBuffer); }
 	int GetText(int nIndex, LPTSTR lpszBuffer) const
 	{ ASSERT(::IsWindow(_hwnd)); return (int)::SendMessage(_hwnd, LB_GETTEXT, nIndex, (LPARAM)lpszBuffer); }
-	void GetText(int nIndex, CString& rString) const
-	{ ASSERT(::IsWindow(_hwnd)); GetText(nIndex, rString.GetBufferSetLength(GetTextLen(nIndex)));
-	rString.ReleaseBuffer(); }
+	//void GetText(int nIndex, CString& rString) const
+	//{ ASSERT(::IsWindow(_hwnd)); GetText(nIndex, rString.GetBufferSetLength(GetTextLen(nIndex)));
+	//rString.ReleaseBuffer(); }
 	int GetTextLen(int nIndex) const
 	{ ASSERT(::IsWindow(_hwnd)); return (int)::SendMessage(_hwnd, LB_GETTEXTLEN, nIndex, 0); }
 
@@ -945,7 +944,7 @@ public:
 	void SetRectRgn(int x1, int y1, int x2, int y2);
 	void SetRectRgn(LPCRECT lpRect);
 	int CombineRgn(CRgn* pRgn1, CRgn* pRgn2, int nCombineMode);
-	int CopyRgn(CRgn* pRgnSrc);
+	int CopyRgn1(CRgn* pRgnSrc);
 	BOOL EqualRgn(CRgn* pRgn) const;
 	int OffsetRgn(int x, int y);
 	int OffsetRgn(POINT point);
@@ -1218,51 +1217,51 @@ public:
 	BOOL TextOutA (int x,int y,LPCSTR lpszString,int nCount);
 	BOOL TextOutW (int x,int y,LPCWSTR lpszString,int nCount);
 	BOOL TextOut (int x,int y,LPCTSTR lpszString,int nCount);
-	BOOL TextOut(int x, int y, const CString& str);
+	//BOOL TextOut(int x, int y, const CString& str);
 	BOOL ExtTextOutA (int x,int y,UINT nOptions,LPCRECT lpRect,LPCSTR lpszString,
 		UINT nCount,LPINT lpDxWidths);
 	BOOL ExtTextOutW (int x,int y,UINT nOptions,LPCRECT lpRect,LPCWSTR lpszString,
 		UINT nCount,LPINT lpDxWidths);
 	BOOL ExtTextOut (int x,int y,UINT nOptions,LPCRECT lpRect,LPCTSTR lpszString,
 		UINT nCount,LPINT lpDxWidths);
-	BOOL ExtTextOut(int x, int y, UINT nOptions, LPCRECT lpRect,
-		const CString& str, LPINT lpDxWidths);
+	//BOOL ExtTextOut(int x, int y, UINT nOptions, LPCRECT lpRect,
+	//	const CString& str, LPINT lpDxWidths);
 	CSize TabbedTextOutA (int x,int y,LPCSTR lpszString,int nCount,int nTabPositions
 		,LPINT lpnTabStopPositions,int nTabOrigin);
 	CSize TabbedTextOutW (int x,int y,LPCWSTR lpszString,int nCount,int 
 		nTabPositions,LPINT lpnTabStopPositions,int nTabOrigin);
 	CSize TabbedTextOut (int x,int y,LPCTSTR lpszString,int nCount,int nTabPositions
 		,LPINT lpnTabStopPositions,int nTabOrigin);
-	CSize TabbedTextOut(int x, int y, const CString& str,
-		int nTabPositions, LPINT lpnTabStopPositions, int nTabOrigin);
+	//CSize TabbedTextOut(int x, int y, const CString& str,
+	//	int nTabPositions, LPINT lpnTabStopPositions, int nTabOrigin);
 	int DrawTextA (LPCSTR lpszString,int nCount,LPRECT lpRect,UINT nFormat);
 	int DrawTextW (LPCWSTR lpszString,int nCount,LPRECT lpRect,UINT nFormat);
 	int DrawText (LPCTSTR lpszString,int nCount,LPRECT lpRect,UINT nFormat);
-	int DrawText(const CString& str, LPRECT lpRect, UINT nFormat);
+	//int DrawText(const CString& str, LPRECT lpRect, UINT nFormat);
 	CSize GetTextExtentA (LPCSTR lpszString,int nCount)const;
 	CSize GetTextExtentW (LPCWSTR lpszString,int nCount)const;
 	CSize GetTextExtent (LPCTSTR lpszString,int nCount)const;
-	CSize GetTextExtent(const CString& str) const;
+	//CSize GetTextExtent(const CString& str) const;
 	CSize GetOutputTextExtentA(LPCSTR lpszString,int nCount)const;
 	CSize GetOutputTextExtentW(LPCWSTR lpszString,int nCount)const;
 	CSize GetOutputTextExtent(LPCTSTR lpszString,int nCount)const;
-	CSize GetOutputTextExtent(const CString& str) const;
+	//CSize GetOutputTextExtent(const CString& str) const;
 	CSize GetTabbedTextExtentA(LPCSTR lpszString,int nCount,int nTabPositions,LPINT
 		lpnTabStopPositions)const;
 	CSize GetTabbedTextExtentW(LPCWSTR lpszString,int nCount,int nTabPositions,
 		LPINT lpnTabStopPositions)const;
 	CSize GetTabbedTextExtent(LPCTSTR lpszString,int nCount,int nTabPositions,LPINT
 		lpnTabStopPositions)const;
-	CSize GetTabbedTextExtent(const CString& str,
-		int nTabPositions, LPINT lpnTabStopPositions) const;
+	//CSize GetTabbedTextExtent(const CString& str,
+	//	int nTabPositions, LPINT lpnTabStopPositions) const;
 	CSize GetOutputTabbedTextExtentA(LPCSTR lpszString,int nCount,int nTabPositions
 		,LPINT lpnTabStopPositions)const;
 	CSize GetOutputTabbedTextExtentW(LPCWSTR lpszString,int nCount,int 
 		nTabPositions,LPINT lpnTabStopPositions)const;
 	CSize GetOutputTabbedTextExtent(LPCTSTR lpszString,int nCount,int 
 		nTabPositions,LPINT lpnTabStopPositions)const;
-	CSize GetOutputTabbedTextExtent(const CString& str,
-		int nTabPositions, LPINT lpnTabStopPositions) const;
+	//CSize GetOutputTabbedTextExtent(const CString& str,
+	//	int nTabPositions, LPINT lpnTabStopPositions) const;
 	BOOL GrayString(CBrush* pBrush, 
 		BOOL (CALLBACK* lpfnOutput)(HDC, LPARAM, int), LPARAM lpData,
 			int nCount, int x, int y, int nWidth, int nHeight);
@@ -1271,7 +1270,7 @@ public:
 	int GetTextFaceA( int nCount,LPSTR lpszFacename)const;
 	int GetTextFaceW( int nCount,LPWSTR lpszFacename)const;
 	int GetTextFace( int nCount,LPTSTR lpszFacename)const;
-	int GetTextFace(CString& rString) const;
+	//int GetTextFace(CString& rString) const;
 	BOOL GetTextMetrics(LPTEXTMETRIC lpMetrics) const;
 	BOOL GetOutputTextMetrics(LPTEXTMETRIC lpMetrics) const;
 	int SetTextJustification(int nBreakExtra, int nBreakCount);
@@ -1571,7 +1570,7 @@ inline void CRgn::SetRectRgn(LPCRECT lpRect)
 inline int CRgn::CombineRgn(CRgn* pRgn1, CRgn* pRgn2, int nCombineMode)
 	{ ASSERT(m_hObject != NULL); return ::CombineRgn((HRGN)m_hObject, (HRGN)pRgn1->GetSafeHandle(),
 		(HRGN)pRgn2->GetSafeHandle(), nCombineMode); }
-inline int CRgn::CopyRgn(CRgn* pRgnSrc)
+inline int CRgn::CopyRgn1(CRgn* pRgnSrc)
 	{ ASSERT(m_hObject != NULL); return ::CombineRgn((HRGN)m_hObject, (HRGN)pRgnSrc->GetSafeHandle(), NULL, RGN_COPY); }
 inline BOOL CRgn::EqualRgn(CRgn* pRgn) const
 	{ ASSERT(m_hObject != NULL); return ::EqualRgn((HRGN)m_hObject, (HRGN)pRgn->GetSafeHandle()); }
@@ -1844,34 +1843,34 @@ inline BOOL CDC::ExtFloodFill(int x, int y, COLORREF crColor, UINT nFillType)
 	{ ASSERT(m_hDC != NULL); return ::ExtFloodFill(m_hDC, x, y, crColor, nFillType); }
 inline BOOL CDC::TextOut(int x, int y, LPCTSTR lpszString, int nCount)
 	{ ASSERT(m_hDC != NULL); return ::TextOut(m_hDC, x, y, lpszString, nCount); }
-inline BOOL CDC::TextOut(int x, int y, const CString& str)
-	{ ASSERT(m_hDC != NULL); return TextOut(x, y, (LPCTSTR)str, str.GetLength()); } // call virtual
+//inline BOOL CDC::TextOut(int x, int y, const CString& str)
+//	{ ASSERT(m_hDC != NULL); return TextOut(x, y, (LPCTSTR)str, str.GetLength()); } // call virtual
 inline BOOL CDC::ExtTextOut(int x, int y, UINT nOptions, LPCRECT lpRect,
 	LPCTSTR lpszString, UINT nCount, LPINT lpDxWidths)
 	{ ASSERT(m_hDC != NULL); return ::ExtTextOut(m_hDC, x, y, nOptions, lpRect,
 		lpszString, nCount, lpDxWidths); }
-inline BOOL CDC::ExtTextOut(int x, int y, UINT nOptions, LPCRECT lpRect,
-	const CString& str, LPINT lpDxWidths)
-	{ ASSERT(m_hDC != NULL); return ::ExtTextOut(m_hDC, x, y, nOptions, lpRect,
-		str, str.GetLength(), lpDxWidths); }
+//inline BOOL CDC::ExtTextOut(int x, int y, UINT nOptions, LPCRECT lpRect,
+//	const CString& str, LPINT lpDxWidths)
+//	{ ASSERT(m_hDC != NULL); return ::ExtTextOut(m_hDC, x, y, nOptions, lpRect,
+//		str, str.GetLength(), lpDxWidths); }
 inline CSize CDC::TabbedTextOut(int x, int y, LPCTSTR lpszString, int nCount,
 	int nTabPositions, LPINT lpnTabStopPositions, int nTabOrigin)
 	{ ASSERT(m_hDC != NULL); return ::TabbedTextOut(m_hDC, x, y, lpszString, nCount,
 		nTabPositions, lpnTabStopPositions, nTabOrigin); }
-inline CSize CDC::TabbedTextOut(int x, int y, const CString& str,
-	int nTabPositions, LPINT lpnTabStopPositions, int nTabOrigin)
-	{ ASSERT(m_hDC != NULL); return ::TabbedTextOut(m_hDC, x, y, str, str.GetLength(),
-		nTabPositions, lpnTabStopPositions, nTabOrigin); }
+//inline CSize CDC::TabbedTextOut(int x, int y, const CString& str,
+//	int nTabPositions, LPINT lpnTabStopPositions, int nTabOrigin)
+//	{ ASSERT(m_hDC != NULL); return ::TabbedTextOut(m_hDC, x, y, str, str.GetLength(),
+//		nTabPositions, lpnTabStopPositions, nTabOrigin); }
 inline int CDC::DrawText(LPCTSTR lpszString, int nCount, LPRECT lpRect,
 		UINT nFormat)
 	{ ASSERT(m_hDC != NULL);
 		return ::DrawText(m_hDC, lpszString, nCount, lpRect, nFormat); }
-inline int CDC::DrawText(const CString& str, LPRECT lpRect, UINT nFormat)
-	{ ASSERT(m_hDC != NULL);
-		// these flags would modify the string
-		ASSERT((nFormat & (DT_END_ELLIPSIS | DT_MODIFYSTRING)) != (DT_END_ELLIPSIS | DT_MODIFYSTRING));
-		ASSERT((nFormat & (DT_PATH_ELLIPSIS | DT_MODIFYSTRING)) != (DT_PATH_ELLIPSIS | DT_MODIFYSTRING));
-		return DrawText((LPCTSTR)str, str.GetLength(), lpRect, nFormat); }
+//inline int CDC::DrawText(const CString& str, LPRECT lpRect, UINT nFormat)
+//	{ ASSERT(m_hDC != NULL);
+//		// these flags would modify the string
+//		ASSERT((nFormat & (DT_END_ELLIPSIS | DT_MODIFYSTRING)) != (DT_END_ELLIPSIS | DT_MODIFYSTRING));
+//		ASSERT((nFormat & (DT_PATH_ELLIPSIS | DT_MODIFYSTRING)) != (DT_PATH_ELLIPSIS | DT_MODIFYSTRING));
+//		return DrawText((LPCTSTR)str, str.GetLength(), lpRect, nFormat); }
 inline CSize CDC::GetTextExtent(LPCTSTR lpszString, int nCount) const
 	{
 		ASSERT(m_hDC != NULL);
@@ -1879,13 +1878,13 @@ inline CSize CDC::GetTextExtent(LPCTSTR lpszString, int nCount) const
 		VERIFY(::GetTextExtentPoint32(m_hDC, lpszString, nCount, &size));
 		return size;
 	}
-inline CSize CDC::GetTextExtent(const CString& str) const
-	{
-		ASSERT(m_hDC != NULL);
-		SIZE size;
-		VERIFY(::GetTextExtentPoint32(m_hDC, str, str.GetLength(), &size));
-		return size;
-	}
+//inline CSize CDC::GetTextExtent(const CString& str) const
+//	{
+//		ASSERT(m_hDC != NULL);
+//		SIZE size;
+//		VERIFY(::GetTextExtentPoint32(m_hDC, str, str.GetLength(), &size));
+//		return size;
+//	}
 
 inline CSize CDC::GetOutputTextExtent(LPCTSTR lpszString, int nCount) const
 	{
@@ -1894,30 +1893,30 @@ inline CSize CDC::GetOutputTextExtent(LPCTSTR lpszString, int nCount) const
 		VERIFY(::GetTextExtentPoint32(m_hDC, lpszString, nCount, &size));
 		return size;
 	}
-inline CSize CDC::GetOutputTextExtent(const CString& str) const
-	{
-		ASSERT(m_hDC != NULL);
-		SIZE size;
-		VERIFY(::GetTextExtentPoint32(m_hDC, str, str.GetLength(), &size));
-		return size;
-	}
+//inline CSize CDC::GetOutputTextExtent(const CString& str) const
+//	{
+//		ASSERT(m_hDC != NULL);
+//		SIZE size;
+//		VERIFY(::GetTextExtentPoint32(m_hDC, str, str.GetLength(), &size));
+//		return size;
+//	}
 
 inline CSize CDC::GetTabbedTextExtent(LPCTSTR lpszString, int nCount,
 	int nTabPositions, LPINT lpnTabStopPositions) const
 	{ ASSERT(m_hDC != NULL); return ::GetTabbedTextExtent(m_hDC, lpszString, nCount,
 		nTabPositions, lpnTabStopPositions); }
-inline  CSize CDC::GetTabbedTextExtent(const CString& str,
-		int nTabPositions, LPINT lpnTabStopPositions) const
-	{ ASSERT(m_hDC != NULL); return ::GetTabbedTextExtent(m_hDC,
-		str, str.GetLength(), nTabPositions, lpnTabStopPositions); }
+//inline  CSize CDC::GetTabbedTextExtent(const CString& str,
+//		int nTabPositions, LPINT lpnTabStopPositions) const
+//	{ ASSERT(m_hDC != NULL); return ::GetTabbedTextExtent(m_hDC,
+//		str, str.GetLength(), nTabPositions, lpnTabStopPositions); }
 inline CSize CDC::GetOutputTabbedTextExtent(LPCTSTR lpszString, int nCount,
 	int nTabPositions, LPINT lpnTabStopPositions) const
 	{ ASSERT(m_hDC != NULL); return ::GetTabbedTextExtent(m_hDC, lpszString, nCount,
 		nTabPositions, lpnTabStopPositions); }
-inline  CSize CDC::GetOutputTabbedTextExtent(const CString& str,
-		int nTabPositions, LPINT lpnTabStopPositions) const
-	{ ASSERT(m_hDC != NULL); return ::GetTabbedTextExtent(m_hDC,
-		str, str.GetLength(), nTabPositions, lpnTabStopPositions); }
+//inline  CSize CDC::GetOutputTabbedTextExtent(const CString& str,
+//		int nTabPositions, LPINT lpnTabStopPositions) const
+//	{ ASSERT(m_hDC != NULL); return ::GetTabbedTextExtent(m_hDC,
+//		str, str.GetLength(), nTabPositions, lpnTabStopPositions); }
 inline BOOL CDC::GrayString(CBrush* pBrush,
 	BOOL (CALLBACK* lpfnOutput)(HDC, LPARAM, int),
 		LPARAM lpData, int nCount,
@@ -1928,10 +1927,10 @@ inline UINT CDC::GetTextAlign() const
 	{ ASSERT(m_hDC != NULL); return ::GetTextAlign(m_hDC); }
 inline int CDC::GetTextFace(int nCount, LPTSTR lpszFacename) const
 	{ ASSERT(m_hDC != NULL); return ::GetTextFace(m_hDC, nCount, lpszFacename); }
-inline  int CDC::GetTextFace(CString& rString) const
-	{ ASSERT(m_hDC != NULL); int nResult = ::GetTextFace(m_hDC,
-		256, rString.GetBuffer(256)); rString.ReleaseBuffer();
-		return nResult; }
+//inline  int CDC::GetTextFace(CString& rString) const
+//	{ ASSERT(m_hDC != NULL); int nResult = ::GetTextFace(m_hDC,
+//		256, rString.GetBuffer(256)); rString.ReleaseBuffer();
+//		return nResult; }
 inline BOOL CDC::GetTextMetrics(LPTEXTMETRIC lpMetrics) const
 	{ ASSERT(m_hDC != NULL); return ::GetTextMetrics(m_hDC, lpMetrics); }
 inline BOOL CDC::GetOutputTextMetrics(LPTEXTMETRIC lpMetrics) const
@@ -2034,10 +2033,10 @@ inline BOOL CDC::PolyBezier(const POINT* lpPoints, int nCount)
 
 inline int CDC::DrawEscape(int nEscape, int nInputSize, LPCSTR lpszInputData)
 	{ ASSERT(m_hDC != NULL); return ::DrawEscape(m_hDC, nEscape, nInputSize, lpszInputData); }
-inline int CDC::Escape(int nEscape, int nInputSize, LPCSTR lpszInputData,
-		int nOutputSize, LPSTR lpszOutputData)
-	{ ASSERT(m_hDC != NULL); return ::ExtEscape(m_hDC, nEscape, nInputSize, lpszInputData,
-		nOutputSize, lpszOutputData); }
+//inline int CDC::Escape(int nEscape, int nInputSize, LPCSTR lpszInputData,
+//		int nOutputSize, LPSTR lpszOutputData)
+//	{ ASSERT(m_hDC != NULL); return ::ExtEscape(m_hDC, nEscape, nInputSize, lpszInputData,
+//		nOutputSize, lpszOutputData); }
 
 inline BOOL CDC::GetCharABCWidths(UINT nFirstChar, UINT nLastChar,
 		LPABCFLOAT lpABCF) const

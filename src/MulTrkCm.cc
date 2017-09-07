@@ -1,6 +1,6 @@
+#include "stdafx.h"
 #include "MultiTrack.h"
 #include "filelist.h"
-#include "lib/console.h"
 #include <conio.h>
 
 struct MultiTrackCmdLine
@@ -200,11 +200,11 @@ void MultiTrackCmdLine::AddFile(void)
 	FileNameList fnl;
 	fnl.FromOfn(conHwnd);
 	linePos = 7;
-	while(TCHAR* name = fnl.Get())
+	while(char* name = fnl.Get())
 	{
-		TCHAR* filename = getName(name);
+		char* filename = getName(name);
 		locate(0, linePos);
-		printf("#" TSTRPC, filename);
+		printf("#s", filename);
 		char result = mt.add(name);
 		if(result)
 		{
@@ -214,7 +214,7 @@ void MultiTrackCmdLine::AddFile(void)
 				linePos = 8;
 			locate(0, 7);
 			set_colmap(COLOR_WARNIH);
-			printf("%c" TSTRPC, result, filename);
+			printf("%c%s", result, filename);
 			set_colmap(COLOR_NORMAL);
 		}
 		else
@@ -280,7 +280,7 @@ void MultiTrackCmdLine::PrintTracks(char mode, bool dir)
 		if( mt[count].selected )
 			colMode |= COLOR_SELCTD;
 		set_colmap(colMode);
-		printf("%d: " TSTRPC "\n", count+1, mt[count].filename);	
+		printf("%d: %s\n", count+1, mt[count].filename);	
 	}
 	set_colmap(COLOR_NORMAL);
 }

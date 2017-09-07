@@ -42,9 +42,9 @@ BOOL initcon(void)
 	if(AllocConsole())
 	{
 		// Setup stdin and stdout
-		freopen("conin$", "r", stdin);
-		freopen("conout$", "w", stdout);
-		freopen("conout$", "w", stderr);
+		_wfreopen(L"conin$", L"r", stdin);
+		_wfreopen(L"conout$", L"w", stdout);
+		_wfreopen(L"conout$", L"w", stderr);
 		setvbuf( stdin, NULL, _IONBF, 0 );
 		setvbuf( stdout, NULL, _IONBF, 0 );
 		setvbuf( stderr, NULL, _IONBF, 0 );

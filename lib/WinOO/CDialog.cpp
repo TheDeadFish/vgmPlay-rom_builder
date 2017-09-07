@@ -8,7 +8,7 @@ HWND CDialog_Create( HWND hwnd, LPCTSTR lpTemplateName, DLGPROC dlgProc, LPARAM 
 	HWND tmp = CreateDialogParam(GetModuleHandle(NULL),
 	lpTemplateName,	hwnd, dlgProc, _this );
 	if( CDialog_Count == CDialog_MAX){
-		MessageBox(hwnd, "CDialog_Create: Out of Window Slots", "FATAL ERROR", MB_OK | MB_ICONERROR);
+		MessageBoxA(hwnd, "CDialog_Create: Out of Window Slots", "FATAL ERROR", MB_OK | MB_ICONERROR);
 		ExitProcess(-1);}
 	CDialog_Hwnd[CDialog_Count++] = tmp;
 	return tmp;}

@@ -82,7 +82,7 @@ long class::_MessageMap_(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
 #define END_MESSAGE_MAP() default: return 0; }} 
 
 // MFC message list
-#define ON_MESSAGE(msg, func) case msg: return func(wParam, lParam);
+//#define ON_MESSAGE(msg, func) case msg: return func(wParam, lParam);
 #define ON_WM_LBUTTONDOWN() case WM_LBUTTONDOWN:{ func(wParam, CPoint(lParam)); return 1;}
 #define ON_WM_LBUTTONDBLCLK() case WM_LBUTTONDOWN:{ func(wParam, CPoint(lParam)); return 1;}
 #define ON_WM_KEYDOWN() case WM_KEYDOWN: { func(wParam, LOWORD(lParam), HIWORD(lParam)); return 1;}

@@ -1,6 +1,6 @@
+#include "stdafx.h"
 #include "MultiTrack.h"
 #include "FileList.h"
-#include "WinOO\WinOO.h"
 #include "WinOO\Extra\ListBox_LineNum.h"
 #include "FirstGui.h"
 #include "resource.h"
@@ -18,7 +18,7 @@ public:
 		used = _used;
 		char usedtemp[64];
 		sprintf(usedtemp, "RomUsed: %dKB", used / 1024);
-		romSize.SetWindowText(usedtemp);
+		setWindowText(romSize, usedtemp);
 	}
 	INT_PTR ColorStatic( WPARAM wParam, LPARAM lParam ){
 		if((used > 1024*4096)&&(lParam == (LPARAM)romSize._hwnd)){
@@ -49,16 +49,16 @@ public:
 		}else
 			static2.SetWindowTextA("");
 	}
-	void Write(bool mode, bool col, TCHAR symb, const TCHAR* text)
+	void Write(bool mode, bool col, char symb, const char* text)
 	{
 		bool _line = line & mode;
 		col1 = col;
 		char tmp0[] = "  "; tmp0[0] = symb;
-		CString tmp = CString(tmp0) += text;
+		xstr tmp = xstrfmt("%s%s", tmp0, text);
 		if(_line)
-			static2.SetWindowText(tmp);
+			setWindowText(static2, tmp);
 		else
-			static1.SetWindowText(tmp);
+			setWindowText(static1, tmp);
 	}
 	void ResetLine(void){
 		line = 0;
@@ -175,9 +175,9 @@ FMainWndProcHandlrM(MultiTrackWinGui)
 
 void MultiTrackWinGui::AddFile(FileNameList& fnl)
 {
-	while(TCHAR* name = fnl.Get())
+	while(char* name = fnl.Get())
 	{
-		TCHAR* filename = getName(name);
+		char* filename = getName(name);
 		
 		
 		StaticPrn.Write(1, 0, '#', filename);
@@ -189,7 +189,7 @@ void MultiTrackWinGui::AddFile(FileNameList& fnl)
 		}
 		else
 		{
-			ListBox.AddString(filename);
+			sendMessageU(ListBox, LB_ADDSTRING, filename);
 			RomSizePrn.Set(mt.totalSize);
 			StaticPrn.Clear(true);
 		}
@@ -199,7 +199,7 @@ void MultiTrackWinGui::AddFile(FileNameList& fnl)
 bool MultiTrackWin(RECT& rc)
 {
 	MultiTrackWinGui mtw(rc);
-	int result = (int)mtw.Create(NULL, "ROMBUILD_DIALOG", true);
+	int result = (int)mtw.Create(NULL, _T("ROMBUILD_DIALOG"), true);
 	if(result <= 0)
 		fatalError("Cannot create GUI");
 	return result-1;

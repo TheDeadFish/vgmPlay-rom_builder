@@ -21,11 +21,10 @@ CWindowSC( ListBox_LineNum, CListBoxSC )
 			SetBkColor( ds.hDC, GetSysColor(COLOR_WINDOW));
 			FillRect( ds.hDC, &ds.rcItem, GetSysColorBrush(COLOR_WINDOW));
 		}
-		if(ds.itemID != -1){
-			CString tmp;
-			GetText(ds.itemID, tmp);
-			tmp = CString((int)ds.itemID) += ": " + tmp;
-			TextOut(ds.hDC, ds.rcItem.left, ds.rcItem.top, tmp, tmp.GetLength());
+		if(ds.itemID != -1){ WCHAR buff[MAX_PATH+20];
+			int len = _swprintf(buff, L"%d: ", ds.itemID);
+			len += GetText(ds.itemID, buff+len);
+			TextOut(ds.hDC, ds.rcItem.left, ds.rcItem.top, buff, len);
 		}
 		if((ds.itemAction & ODA_FOCUS) != 0)
 			if(!(ds.itemState & ODS_FOCUS))

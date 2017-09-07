@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "VGM_PLAY.h"
 
 #define error_success		0
@@ -13,23 +14,23 @@
 #define error_noSrc			10
 #define error_undef			11
 
-byte* loadvgm(TCHAR* fName, int& fileSize)
+byte* loadvgm(char* fName, int& fileSize)
 {
 	// Prepare command line
-	TCHAR cmdLine[560];	
+	char cmdLine[560];	
 	char opts[64] = "-d0 -q -s";
 	config.getScale(opts+9);
 	opts[2] += config.dupRemove;
 	if(config.bitOpts & DacAvenc) opts[5] = 'a';
 	snprintf(cmdLine, ARRAYSIZE(cmdLine),
-		_T("# -q -c -i %s \"%s\" \"%s\""),
+		"# -q -c -i %s \"%s\" \"%s\"",
 		opts, ExePathCat("tmp.vgc"), fName);
 	
 	// Call vgmConv.exe with no console
 	DWORD errCode;
-	STARTUPINFO si = {0};
+	STARTUPINFOA si = {0};
     PROCESS_INFORMATION pi = {0};
-	if( !CreateProcess( ExePathCat("vgmConv.exe"), cmdLine,
+	if( !createProcess( ExePathCat("vgmConv.exe"), cmdLine,
 	NULL, NULL, FALSE, DETACHED_PROCESS, NULL, NULL, &si, &pi))
 		fatalError("failed to call vgmConv.exe");
 	WaitForSingleObject( pi.hProcess, INFINITE );
@@ -58,14 +59,7 @@ byte* loadvgm(TCHAR* fName, int& fileSize)
 	}
 	
 	// Open temporary VGC file
-	int vgcHeader[6], tmpSize;
-	FILE* fp = xfopen(ExePathCat("tmp.vgc"), _T("!rbD"));
-	xfread(vgcHeader, fp);
-	tmpSize = bswap32(vgcHeader[5]);
-	fileSize = (tmpSize+1) & ~1;
-	byte* data = xmalloc(fileSize);
-	memcpy(data, vgcHeader, 24);
-	xfread(data+24, tmpSize-24, fp);
-	fclose(fp);
-	return data;
+	auto file = loadFile(ExePathCat("tmp.vgc"));
+	if(!file) fatalError("loadFile: tmp.vgm");
+	fileSize = file.size; return file.data;
 }

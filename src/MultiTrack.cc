@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "MultiTrack.h"
 #include <math.h>
 
@@ -40,7 +41,7 @@ int getPadSize(int RomSize)
 MultiTrack::MultiTrack()
 {
 	// Load VGC player 
-	FILE* fp = xfopen(ExePathCat("vgmPlay.dat"), _T("!rb"));
+	FILE* fp = xfopen(ExePathCat("vgmPlay.dat"), "!rb");
 	romSize = fsize(fp);
 	romData = xmalloc(romSize);
 	xfread(romData, romSize, fp);
@@ -51,19 +52,18 @@ MultiTrack::MultiTrack()
 	data = NULL;
 }
 
-char MultiTrack::add(TCHAR* filename)
+char MultiTrack::add(char* filename)
 {
 	// Load VGM file
-	xNextAlloc(data, nTracks);
-	data[nTracks].vgmdata = loadvgm(
-		filename, data[nTracks].filesize);
-	if(data[nTracks].vgmdata == 0)
-		return data[nTracks].filesize;
+	auto& trk = xNextAlloc(data, nTracks);
+	trk.vgmdata = loadvgm(
+		filename, trk.filesize);
+	if(trk.vgmdata == 0)
+		return trk.filesize;
 
-	totalSize += data[nTracks].filesize+4;
-	data[nTracks].selected = false;
-	data[nTracks].filename = NULL;
-	nTracks++;
+	totalSize += trk.filesize+4;
+	trk.selected = false;
+	trk.filename = NULL;
 	return 0;
 }
 
@@ -103,7 +103,9 @@ bool MultiTrack::build()
 	else
 		*(uint*)(romData+8) = 0;
 	*(uint*)(romData+12) = bswap32( lrint(config.MS_Pause*44.1) );
-	fpout = xfopen(ExePathCat("vgmPlay.bin"), _T("!wb"));
+	fpout = xfopen(ExePathCat("vgmPlay.bin"), "!wb");
+	printf("%X\n", fpout);
+	
 	xfwrite(romData, romSize, fpout);
 
 	// write number of tracks to ROM

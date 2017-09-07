@@ -130,7 +130,7 @@ inline HBITMAP LoadBitmap(HINSTANCE a, LPCTSTR b)
 
 #ifdef CreateDC
 #undef CreateDC
-inline HDC CreateDC(LPCSTR a, LPCTSTR b, LPCTSTR c, const DEVMODE *d)
+inline HDC CreateDC(LPCTSTR a, LPCTSTR b, LPCTSTR c, const DEVMODE *d)
 #ifdef UNICODE
 	{	CreateDCW(a, b, c, d); }
 #else	
@@ -140,7 +140,7 @@ inline HDC CreateDC(LPCSTR a, LPCTSTR b, LPCTSTR c, const DEVMODE *d)
 
 #ifdef CreateIC
 #undef CreateIC
-inline HDC CreateIC(LPCSTR a, LPCTSTR b, LPCSTR c, const DEVMODEA *d)
+inline HDC CreateIC(LPCTSTR a, LPCTSTR b, LPCTSTR c, const DEVMODE *d)
 #ifdef UNICODE
 	{	return CreateICW(a, b, c, d); }
 #else	

@@ -2,9 +2,9 @@
 #define _MultiTrk_H_
 #include "VGM_PLAY.h"
 
-byte* loadvgm(TCHAR* fName, int& fileSize);
+byte* loadvgm(char* fName, int& fileSize);
 void MtiRectCalc(HWND hwnd, RECT &rect);
-bool MultiTrackOne(TCHAR *argv[]);
+bool MultiTrackOne(char *argv[]);
 bool MultiTrackCmd(RECT& rc);
 bool MultiTrackWin(RECT& rc);
 
@@ -13,7 +13,7 @@ class MultiTrack
 public:
 	// methods
 	MultiTrack();
-	char add(TCHAR* fName);
+	char add(char* fName);
 	void remove(int iTrack);
 	void select(int iTrack, bool);
 	bool build();
