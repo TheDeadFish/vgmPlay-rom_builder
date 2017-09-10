@@ -78,7 +78,7 @@ bool MultiTrackCmd(RECT& rect)
 bool MultiTrackCmdLine::Get_Command()
 {
 	while(1){
-		PrintUsed(mt.totalSize);
+		PrintUsed(mt.totalSize());
 		fflush(stdin);
 		byte option = getch();
 		switch(option)
@@ -219,8 +219,7 @@ void MultiTrackCmdLine::AddFile(void)
 		}
 		else
 		{
-			mt[mt.nTracks-1].filename = xstrdup(filename);
-			PrintUsed(mt.totalSize);
+			PrintUsed(mt.totalSize());
 		}
 		ClearLine(linePos);
 	}

@@ -3,5 +3,9 @@
 #include <inifile.h>
 #include <resize.h>
 #include "console.h"
+#include <imagelib\imageLib.h>
+#include <imageLib\quantize.h>
+#include <imageLib\nearest_color.h>
+
 
 void WINAPI LinNumListBoxInit(HWND hList);

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "MultiTrack.h"
 #include <math.h>
+#include "mdcode.h"
 
 void MtiRectCalc(HWND winHwnd, RECT &rect)
 {
@@ -47,7 +48,7 @@ MultiTrack::MultiTrack()
 	xfread(romData, romSize, fp);
 	fclose(fp);
 
-	totalSize = romSize;
+	uiFlags = 0xFF;
 	nTracks = 0;
 	data = NULL;
 }
@@ -61,10 +62,29 @@ char MultiTrack::add(char* filename)
 	if(trk.vgmdata == 0)
 		return trk.filesize;
 
-	totalSize += trk.filesize+4;
 	trk.selected = false;
-	trk.filename = NULL;
-	return 0;
+	trk.filename = getName(filename).xdup();
+	trk.img = NULL; return 0;
+}
+
+void MultiTrack::imgReset(void)
+{
+	for(int i = 0; i < nTracks; i++) {
+		if(data[i].img) data[i].img->fileOffset = 0; }
+}
+
+int MultiTrack::totalSize(void)
+{
+	this->imgReset();
+	int size = romSize+3;
+	for(int i = 0; i < nTracks; i++)
+	if(!data[i].selected) { size += data[i].filesize;
+		if((data[i].img)&&(!data[i].img->fileOffset)) {
+			data[i].img->fileOffset = 1; 
+			size += data[i].img->getSize();  }
+	}
+	
+	return size;
 }
 
 void MultiTrack::remove(int iTrack)
@@ -79,14 +99,7 @@ void MultiTrack::remove(int iTrack)
 
 void MultiTrack::select(int iTrack, bool select)
 {
-	if(data[iTrack].selected != select)
-	{	
-		data[iTrack].selected = select;
-		if(select)
-			totalSize -= data[iTrack].filesize+4;
-		else
-			totalSize += data[iTrack].filesize+4;
-	}
+	data[iTrack].selected = select;
 }
 
 bool MultiTrack::build()
@@ -98,11 +111,10 @@ bool MultiTrack::build()
 	uint RomPos;
 
 	// Write VGC player
-	if(nTracks > 1)
-		*(uint*)(romData+8) = bswap32(config.RepeatLooped);
-	else
-		*(uint*)(romData+8) = 0;
-	*(uint*)(romData+12) = bswap32( lrint(config.MS_Pause*44.1) );
+	mdcode_setUiFlags(romData, uiFlags);
+	mdcode_setRepLoop(romData, (nTracks > 1)
+		? config.RepeatLooped : 0);
+	mdcode_setPause(romData, lrint(config.MS_Pause*44.1));
 	fpout = xfopen(ExePathCat("vgmPlay.bin"), "!wb");
 	printf("%X\n", fpout);
 	
@@ -123,8 +135,20 @@ bool MultiTrack::build()
 	}
 			
 	// write track data to ROM
-	for(int i = 0; i < nTracks; i++)
-		xfwrite(data[i].vgmdata, data[i].filesize, fpout);
+	RomPos = ALIGN4(RomPos); this->imgReset();
+	for(int i = 0; i < nTracks; i++) { DWORD offset = 0;
+		if(data[i].img) { if(!data[i].img->fileOffset) { 
+		data[i].img->fileOffset = release(RomPos,
+			RomPos+data[i].img->getSize()); }
+		offset = bswap32(data[i].img->fileOffset); }
+		RI(data[i].vgmdata, 20) = offset; 
+		xfwrite(data[i].vgmdata, data[i].filesize, fpout); }
+		
+	// write images to ROM
+	for(int i = 0; i < nTracks; i++) if((data[i].img)
+		&&(data[i].img->fileOffset)) { fseek(fpout, 
+			release(data[i].img->fileOffset), SEEK_SET);
+			data[i].img->write(fpout); }
 	
 	// pad out the ROM
 	int padSize = getPadSize(RomPos);

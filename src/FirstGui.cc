@@ -54,7 +54,7 @@ void OptionsDialog::OnOk(HWND hwnd)
 	config.save();
 }
 
-INT_PTR CALLBACK OptionsDialog::DlgProc(HWND hwnd,
+INT_PTR OptionsDialog::DlgProc(HWND hwnd,
 	UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	DLGMSG_SWITCH(
@@ -86,7 +86,7 @@ struct MainDialog
 	MEMBER_DLGPROC(MainDialog, DlgProc,)
 };
 
-INT_PTR CALLBACK MainDialog::DlgProc(HWND hwnd,
+INT_PTR MainDialog::DlgProc(HWND hwnd,
 	UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	DLGMSG_SWITCH(
