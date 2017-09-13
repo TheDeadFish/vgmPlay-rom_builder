@@ -16,7 +16,12 @@ struct ImageInfo
 	
 	int getSize();
 	
-	byte* build(ImageLib::Image& img, byte* out);
+	void draw(HDC hdc, int x, int y);
+	
+	
+	
+	
+	
 	
 	void write(FILE* fp);
 	

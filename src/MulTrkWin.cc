@@ -176,9 +176,7 @@ void MultiTrackWinGui::onPaint(void)
 		IntersectClipRect(hdc, 
 			viewRect.left+1, viewRect.top+1, 
 			viewRect.right-1, viewRect.bottom-1);
-		RECT rc = selImg->calcRect();
-		OffsetRect(&rc, viewRect.left+1, viewRect.top+1);
-		selImg->img.strBlt(hdc, rc);		
+		selImg->draw(hdc, viewRect.left+1, viewRect.top+1);
 	}
 	
 	EndPaint(hwnd, &ps);

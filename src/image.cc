@@ -2,37 +2,6 @@
 #include "image.h"
 #include "mdcode.h"
 
-byte* ImageInfo::build(
-	ImageLib::Image& img, byte* out)
-{
-
-
-	// write the palette
-	for(int i = 0; i < 16; i++) {
-		auto c = img.palette[i];
-		WRI(PW(out), ((c.a>>5)<<8)
-		|((c.g>>5)<<12)|(c.b>>5));
-	}
-	
-	// write the sizes
-	WRI(PW(out), bswap16(img.width/8));
-	WRI(PW(out), bswap16(img.height/8));
-
-	// write the tiles
-	for(int y = 0; y < img.height; y += 8)
-	for(int x = 0; x < img.width; x += 8)
-	for(int j = 0; j < 8; j++) {
-		byte* src = img.get8(x, y+j);
-	for(int k = 0; k < 8; k += 2) 
-		WRI(out, (src[k] << 4) | src[k+1]);
-	}
-	
-	return out;
-}
-
-
-
-
 int gene_medianCut(ImageLib::Image& img, 
 	Color* palette, int reqColors, int splitMode)
 {
@@ -131,19 +100,23 @@ void ImageInfo::write(FILE* fp)
 {
 	// create output image
 	auto r = calcRect2();
-	Color pal[16]; memcpyX(pal, img.palette, 16);
-	std::swap(pal[bkgndColor], pal[0]);
-	ImageLib::ImageObj tmp; tmp.Create(
-		r.width, r.height, pal, 16, true);
-	img.strBlt(tmp, r.rc);
+	ImageLib::ImageObj tmp; 
+	ImageLib::ResizeResample(tmp, img, 
+		bkgndColor, r.width, r.height, r.rc, 0);
+	
+	// remap palette
+	memcpyX(tmp.palette, img.palette, 16);
+	std::swap(tmp.palette[bkgndColor], tmp.palette[0]);
+	for(byte& ch : Range(tmp.bColors, tmp.nPixels())) {
+	if(ch == 0) ch = bkgndColor; ei(ch == bkgndColor) ch = 0; }
 	
 	// write image header
 	ImageHeadr head;
 	head.scrollX = bswap16(r.offsetX);
-	head.scrollY = bswap16(r.offsetY);
+	head.scrollY = bswap16(-r.offsetY);
 	head.width = bswap16(r.width/8); 
 	head.height = bswap16(r.height/8);
-	for(int i = 0; i < 16; i++) { auto c = pal[i];
+	for(int i = 0; i < 16; i++) { auto c = tmp.palette[i];
 		head.pal[i] = ((c.r>>5)<<9)|((c.g>>5)<<13)|((c.b>>5)<<1); }
 	head.nTile = bswap16((r.width * r.height)/64);
 	xfwrite(head, fp);
@@ -161,4 +134,13 @@ void ImageInfo::write(FILE* fp)
 		src += r.width;
 	}	xfwrite(tile, fp); 
 	}
+}
+
+void ImageInfo::draw(HDC hdc, int x, int y)
+{
+	ImageLib::ImageObj ret;	
+	auto rc = calcRect();
+	ImageLib::ResizeResample(ret, img, 
+		bkgndColor, 320, 224, rc, 0);
+	ret.bitBlt(hdc, x, y);
 }

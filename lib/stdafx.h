@@ -6,6 +6,8 @@
 #include <imagelib\imageLib.h>
 #include <imageLib\quantize.h>
 #include <imageLib\nearest_color.h>
+#include <imageLib\resample.h>
+
 
 
 void WINAPI LinNumListBoxInit(HWND hList);
