@@ -56,7 +56,7 @@ void FileNameList::FromM3u(void)
 {
 	if((names.len != 1)
 	||(strEicmp(*names, ".m3u"))) return;
-	xstr fName = release(*names);
+	xstr fName = names[0].release();
 	this->Free();
 
 	// load .m3u file
