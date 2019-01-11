@@ -59,7 +59,8 @@ byte* loadvgm(char* fName, int& fileSize)
 	}
 	
 	// Open temporary VGC file
-	auto file = loadFile(ExePathCat("tmp.vgc"));
+	auto file = loadFile(ExePathCat("tmp.vgc"), 1);
 	if(!file) fatalError("loadFile: tmp.vgm");
-	fileSize = file.size; return file.data;
+	fileSize = ALIGN(file.size,1); 
+	return file.data;
 }
